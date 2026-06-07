@@ -3,8 +3,6 @@ Flask-SQLAlchemy==3.1.1
 Flask-Login==0.6.3
 Flask-Bcrypt==1.0.1
 Flask-Migrate==4.0.7
-psycopg2-binary==2.9.9
+psycopg2-binary
 python-dotenv==1.0.1
-Pillow==11.2.1
-reportlab==4.2.0
-gunicorn==22.0.0
+gunicorn
