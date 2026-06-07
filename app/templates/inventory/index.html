@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% block title %}Inventario — PyCommerceX{% endblock %}
+{% block topbar_title %}Gestión de Inventario{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>📦 Inventario</h1>
+  <a href="{{ url_for('inventory.new') }}" class="btn btn-primary">+ Nuevo Producto</a>
+</div>
+
+<div class="card">
+  <form class="search-bar" method="GET">
+    <input type="text" name="q" class="form-control" placeholder="Buscar por código o nombre…" value="{{ q }}">
+    <button type="submit" class="btn btn-outline">🔍 Buscar</button>
+    {% if q %}<a href="{{ url_for('inventory.index') }}" class="btn btn-outline">✕ Limpiar</a>{% endif %}
+  </form>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Nombre</th>
+          <th>Stock</th>
+          <th>Mín.</th>
+          <th>Costo</th>
+          <th>Precio Venta</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in products %}
+        <tr>
+          <td><code>{{ p.code }}</code></td>
+          <td>{{ p.name }}</td>
+          <td class="{{ p.status_class }}"><strong>{{ p.stock }}</strong></td>
+          <td>{{ p.min_stock }}</td>
+          <td>$ {{ "{:,}".format(p.cost_price) }}</td>
+          <td>$ {{ "{:,}".format(p.sell_price) }}</td>
+          <td>
+            {% if p.status == 'Disponible' %}
+              <span class="badge badge-success">Disponible</span>
+            {% elif p.status == 'Bajo Stock' %}
+              <span class="badge badge-warning">Bajo Stock</span>
+            {% else %}
+              <span class="badge badge-danger">Agotado</span>
+            {% endif %}
+          </td>
+          <td>
+            <div class="flex-gap" style="justify-content:flex-end">
+              <a href="{{ url_for('inventory.edit', product_id=p.id) }}" class="btn btn-outline btn-sm">✏ Editar</a>
+              <form method="POST" action="{{ url_for('inventory.delete', product_id=p.id) }}"
+                    onsubmit="return confirm('¿Eliminar {{ p.name }}?')">
+                <button type="submit" class="btn btn-danger btn-sm">🗑 Eliminar</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="8" class="text-center text-muted" style="padding:24px">No se encontraron productos.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

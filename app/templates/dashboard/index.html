@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block title %}Panel Principal — PyCommerceX{% endblock %}
+{% block topbar_title %}Panel Principal{% endblock %}
+
+{% block content %}
+<!-- Stats -->
+<div class="stat-grid">
+  <div class="card">
+    <div class="card-title">💰 Ventas del Día</div>
+    <div class="card-value">$ {{ "{:,}".format(total_today) }}</div>
+    <div class="card-sub">{{ invoices_today }} factura{{ 's' if invoices_today != 1 }}</div>
+  </div>
+  <div class="card">
+    <div class="card-title">🛍 Artículos Vendidos</div>
+    <div class="card-value">{{ items_today }}</div>
+    <div class="card-sub">unidades hoy</div>
+  </div>
+  <div class="card">
+    <div class="card-title">📦 Productos Activos</div>
+    <div class="card-value">{{ total_products }}</div>
+    <div class="card-sub">en catálogo</div>
+  </div>
+  <div class="card">
+    <div class="card-title">⚠ Bajo Stock</div>
+    <div class="card-value" style="color: var(--warning)">{{ low_stock_count }}</div>
+    <div class="card-sub">{{ out_of_stock_count }} agotado{{ 's' if out_of_stock_count != 1 }}</div>
+  </div>
+</div>
+
+<!-- Alert Products Table -->
+<div class="card mb-3">
+  <div class="page-header">
+    <h2>⚠ Alertas de Inventario</h2>
+    <a href="{{ url_for('inventory.index') }}" class="btn btn-outline btn-sm">Ver inventario →</a>
+  </div>
+  {% if alert_products %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Nombre</th>
+          <th>Stock Actual</th>
+          <th>Stock Mínimo</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in alert_products %}
+        <tr>
+          <td><code>{{ p.code }}</code></td>
+          <td>{{ p.name }}</td>
+          <td class="{{ p.status_class }}">{{ p.stock }}</td>
+          <td>{{ p.min_stock }}</td>
+          <td>
+            {% if p.status == 'Agotado' %}
+              <span class="badge badge-danger">Agotado</span>
+            {% else %}
+              <span class="badge badge-warning">Bajo Stock</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <p class="text-muted text-center" style="padding:20px">✅ Todos los productos tienen stock suficiente.</p>
+  {% endif %}
+</div>
+
+<!-- Quick Actions -->
+<div class="card">
+  <h3 style="margin-bottom:12px;">⚡ Accesos Rápidos</h3>
+  <div class="quick-actions">
+    <a href="{{ url_for('pos.index') }}" class="qa-card">
+      <span class="qa-icon">🛒</span>
+      <span class="qa-label">Abrir Caja</span>
+    </a>
+    <a href="{{ url_for('inventory.index') }}" class="qa-card">
+      <span class="qa-icon">📦</span>
+      <span class="qa-label">Inventario</span>
+    </a>
+    <a href="{{ url_for('inventory.new') }}" class="qa-card">
+      <span class="qa-icon">➕</span>
+      <span class="qa-label">Nuevo Producto</span>
+    </a>
+    <a href="{{ url_for('sales.index') }}" class="qa-card">
+      <span class="qa-icon">📋</span>
+      <span class="qa-label">Historial Ventas</span>
+    </a>
+    {% if current_user.role in ('jefe', 'administrador') %}
+    <a href="{{ url_for('users.new') }}" class="qa-card">
+      <span class="qa-icon">👤</span>
+      <span class="qa-label">Crear Usuario</span>
+    </a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

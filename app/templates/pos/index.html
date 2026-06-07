@@ -1,0 +1,223 @@
+{% extends 'base.html' %}
+{% block title %}Punto de Venta — PyCommerceX{% endblock %}
+{% block topbar_title %}Punto de Venta{% endblock %}
+
+{% block extra_head %}
+<style>
+  .page-body { padding: 16px; }
+  .prod-card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px;
+    cursor: pointer;
+    transition: all .15s;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .prod-card:hover { border-color: var(--accent); background: var(--bg-hover); }
+  .prod-card .prod-code { font-size: .7rem; font-family: var(--font-mono); color: var(--text-muted); }
+  .prod-card .prod-name { font-weight: 600; font-size: .88rem; }
+  .prod-card .prod-price { font-family: var(--font-mono); color: var(--accent); font-weight: 700; }
+  .prod-card .prod-stock { font-size: .75rem; color: var(--text-muted); }
+  .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px,1fr)); gap: 10px; }
+  .modal-bg {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,.7); z-index: 200;
+    align-items: center; justify-content: center;
+  }
+  .modal-bg.show { display: flex; }
+  .modal {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    width: 100%; max-width: 440px;
+    box-shadow: var(--shadow-lg);
+  }
+  .modal h3 { margin-bottom: 16px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pos-layout">
+
+  <!-- LEFT: Products -->
+  <div class="pos-products">
+    <div class="search-bar mb-2">
+      <input type="text" id="prodSearch" class="form-control" placeholder="Buscar producto por nombre o código…">
+    </div>
+    <div class="products-grid" id="productsGrid">
+      <p class="text-muted" style="padding:12px">Escribe para buscar productos…</p>
+    </div>
+  </div>
+
+  <!-- RIGHT: Cart -->
+  <div class="pos-panel">
+    <div class="pos-panel-header flex-between">
+      <span>🛒 Carrito</span>
+      <button class="btn btn-outline btn-sm" onclick="clearCart()">🗑 Vaciar</button>
+    </div>
+    <div class="pos-panel-body" id="cartBody">
+      <p class="text-muted text-center" style="padding:20px;font-size:.85rem">
+        Selecciona productos para agregar al carrito
+      </p>
+    </div>
+    <div class="pos-panel-footer">
+      <div class="flex-between mb-2">
+        <span class="text-muted">Total:</span>
+        <span class="cart-total" id="cartTotal">$ 0</span>
+      </div>
+      <button class="btn btn-primary btn-lg" style="width:100%;justify-content:center"
+              onclick="openCheckout()">
+        ✅ Finalizar Venta
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- CHECKOUT MODAL -->
+<div class="modal-bg" id="checkoutModal">
+  <div class="modal">
+    <h3>👤 Datos del Cliente</h3>
+    <div class="form-group">
+      <label class="form-label">Identificación *</label>
+      <input type="text" id="custId" class="form-control" placeholder="Cédula o NIT">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nombre completo *</label>
+      <input type="text" id="custName" class="form-control" placeholder="Nombre completo">
+    </div>
+    <div class="form-grid-2">
+      <div class="form-group">
+        <label class="form-label">Teléfono</label>
+        <input type="tel" id="custPhone" class="form-control" placeholder="3001234567">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Correo electrónico</label>
+        <input type="email" id="custEmail" class="form-control" placeholder="correo@email.com">
+      </div>
+    </div>
+    <div class="flex-gap mt-2">
+      <button class="btn btn-primary" onclick="confirmSale()">✅ Confirmar Venta</button>
+      <button class="btn btn-outline" onclick="closeCheckout()">Cancelar</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let cart = {};   // { product_id: { name, price, qty, stock } }
+let searchTimeout;
+
+// ── Product Search ──────────────────────────────────────────
+const searchInput = document.getElementById('prodSearch');
+searchInput.addEventListener('input', () => {
+  clearTimeout(searchTimeout);
+  const q = searchInput.value.trim();
+  if (!q) { document.getElementById('productsGrid').innerHTML = '<p class="text-muted" style="padding:12px">Escribe para buscar productos…</p>'; return; }
+  searchTimeout = setTimeout(() => searchProducts(q), 250);
+});
+
+async function searchProducts(q) {
+  const res = await fetch(`/inventory/api/search?q=${encodeURIComponent(q)}`);
+  const data = await res.json();
+  const grid = document.getElementById('productsGrid');
+  if (!data.length) { grid.innerHTML = '<p class="text-muted" style="padding:12px">Sin resultados.</p>'; return; }
+  grid.innerHTML = data.map(p => `
+    <div class="prod-card" onclick="addToCart(${p.id},'${esc(p.name)}',${p.sell_price},${p.stock})">
+      <span class="prod-code">${p.code}</span>
+      <span class="prod-name">${p.name}</span>
+      <span class="prod-price">$ ${fmt(p.sell_price)}</span>
+      <span class="prod-stock">Stock: ${p.stock}</span>
+    </div>
+  `).join('');
+}
+
+// ── Cart ────────────────────────────────────────────────────
+function addToCart(id, name, price, stock) {
+  if (cart[id]) {
+    if (cart[id].qty >= cart[id].stock) { alert('Stock máximo alcanzado.'); return; }
+    cart[id].qty++;
+  } else {
+    cart[id] = { name, price, qty: 1, stock };
+  }
+  renderCart();
+}
+
+function changeQty(id, delta) {
+  if (!cart[id]) return;
+  cart[id].qty += delta;
+  if (cart[id].qty <= 0) delete cart[id];
+  renderCart();
+}
+
+function clearCart() { cart = {}; renderCart(); }
+
+function renderCart() {
+  const body  = document.getElementById('cartBody');
+  const keys  = Object.keys(cart);
+  if (!keys.length) {
+    body.innerHTML = '<p class="text-muted text-center" style="padding:20px;font-size:.85rem">Carrito vacío</p>';
+    document.getElementById('cartTotal').textContent = '$ 0';
+    return;
+  }
+  let total = 0;
+  body.innerHTML = keys.map(id => {
+    const item = cart[id];
+    const sub = item.price * item.qty;
+    total += sub;
+    return `
+      <div class="cart-item">
+        <div class="cart-item-name">${item.name}</div>
+        <div class="cart-item-qty">
+          <button class="qty-btn" onclick="changeQty(${id},-1)">−</button>
+          <span>${item.qty}</span>
+          <button class="qty-btn" onclick="changeQty(${id},1)">+</button>
+        </div>
+        <div class="cart-item-price">$ ${fmt(sub)}</div>
+      </div>`;
+  }).join('');
+  document.getElementById('cartTotal').textContent = `$ ${fmt(total)}`;
+}
+
+// ── Checkout ────────────────────────────────────────────────
+function openCheckout() {
+  if (!Object.keys(cart).length) { alert('El carrito está vacío.'); return; }
+  document.getElementById('checkoutModal').classList.add('show');
+}
+function closeCheckout() { document.getElementById('checkoutModal').classList.remove('show'); }
+
+async function confirmSale() {
+  const custId    = document.getElementById('custId').value.trim();
+  const custName  = document.getElementById('custName').value.trim();
+  const custPhone = document.getElementById('custPhone').value.trim();
+  const custEmail = document.getElementById('custEmail').value.trim();
+
+  if (!custId || !custName) { alert('Identificación y nombre son requeridos.'); return; }
+
+  const items = Object.entries(cart).map(([id, item]) => ({
+    product_id: parseInt(id), name: item.name, quantity: item.qty
+  }));
+
+  const res = await fetch('/pos/complete', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ customer_id: custId, customer_name: custName,
+                           customer_phone: custPhone, customer_email: custEmail, items })
+  });
+  const data = await res.json();
+  if (data.ok) {
+    window.location.href = `/pos/ticket/${data.sale_id}`;
+  } else {
+    alert('Error: ' + data.msg);
+  }
+}
+
+// ── Helpers ─────────────────────────────────────────────────
+function fmt(n) { return n.toLocaleString('es-CO'); }
+function esc(s) { return s.replace(/'/g, "\\'"); }
+</script>
+{% endblock %}

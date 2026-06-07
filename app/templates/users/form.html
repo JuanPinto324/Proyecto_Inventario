@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}{{ action }} Usuario — PyCommerceX{% endblock %}
+{% block topbar_title %}{{ action }} Usuario{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>{{ '➕' if action == 'Nuevo' else '✏' }} {{ action }} Usuario</h1>
+  <a href="{{ url_for('users.index') }}" class="btn btn-outline">← Volver</a>
+</div>
+
+<div class="card" style="max-width:480px">
+  <form method="POST">
+    <div class="form-group">
+      <label class="form-label">Nombre completo *</label>
+      <input type="text" name="full_name" class="form-control" required
+             value="{{ user.full_name if user else '' }}" placeholder="Nombre y apellido">
+    </div>
+
+    {% if not user %}
+    <div class="form-group">
+      <label class="form-label">Identificación *</label>
+      <input type="text" name="identification" class="form-control" required
+             placeholder="Número de identificación">
+    </div>
+    {% else %}
+    <div class="form-group">
+      <label class="form-label">Identificación</label>
+      <input type="text" class="form-control" value="{{ user.identification }}" disabled>
+    </div>
+    {% endif %}
+
+    <div class="form-group">
+      <label class="form-label">
+        Contraseña {% if user %}(dejar vacío para no cambiar){% else %}*{% endif %}
+      </label>
+      <input type="password" name="password" class="form-control"
+             {% if not user %}required{% endif %} placeholder="••••••••">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Rol *</label>
+      <select name="role" class="form-control">
+        {% for r in allowed_roles %}
+        <option value="{{ r }}" {% if user and user.role == r %}selected{% endif %}>
+          {{ {'jefe':'⭐ Jefe', 'administrador':'🔴 Administrador', 'cajero':'⚪ Cajero'}[r] }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="flex-gap mt-2">
+      <button type="submit" class="btn btn-primary">
+        {{ '➕ Crear Usuario' if action == 'Nuevo' else '💾 Guardar Cambios' }}
+      </button>
+      <a href="{{ url_for('users.index') }}" class="btn btn-outline">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PyCommerceX — Iniciar Sesión</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <style>
+    body { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: var(--bg-base); }
+    .login-wrap { width: 100%; max-width: 400px; padding: 16px; }
+    .login-box {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 36px 32px;
+      box-shadow: var(--shadow-lg);
+    }
+    .login-logo { text-align: center; margin-bottom: 28px; }
+    .login-logo .icon { font-size: 2.5rem; display: block; margin-bottom: 8px; }
+    .login-logo h1 { font-size: 1.5rem; letter-spacing: -.5px; }
+    .login-logo p  { color: var(--text-muted); font-size: .85rem; margin-top: 4px; }
+    .captcha-box {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .captcha-question { font-family: var(--font-mono); font-size: 1rem; font-weight: 600; color: var(--accent); }
+    .roles-info { display: flex; gap: 8px; margin-top: 24px; flex-wrap: wrap; justify-content: center; }
+    .role-chip { font-size: .72rem; padding: 3px 10px; border-radius: 20px; font-weight: 600; }
+  </style>
+</head>
+<body>
+<div class="login-wrap">
+  <div class="login-box">
+    <div class="login-logo">
+      <span class="icon">🛒</span>
+      <h1>PyCommerceX</h1>
+      <p>Sistema de Gestión Comercial</p>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('auth.login') }}">
+      <div class="form-group">
+        <label class="form-label">Identificación</label>
+        <input type="text" name="identification" class="form-control"
+               placeholder="Ingresa tu número de identificación" required autofocus>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contraseña</label>
+        <input type="password" name="password" class="form-control"
+               placeholder="••••••••" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Verificación CAPTCHA</label>
+        <div class="captcha-box">
+          <span class="captcha-question">{{ captcha_question }}</span>
+          <span style="font-size:.75rem;color:var(--text-muted);">Resuelve para continuar</span>
+        </div>
+        <input type="number" name="captcha_answer" class="form-control"
+               placeholder="Tu respuesta" required min="0" max="20">
+      </div>
+      <button type="submit" class="btn btn-primary btn-lg" style="width:100%;justify-content:center;margin-top:8px;">
+        Iniciar Sesión
+      </button>
+    </form>
+
+    <div class="roles-info">
+      <span class="role-chip" style="background:rgba(255,215,0,.1);color:#FFD700;">⭐ Jefe</span>
+      <span class="role-chip" style="background:rgba(229,62,62,.1);color:#E53E3E;">🔴 Administrador</span>
+      <span class="role-chip" style="background:rgba(113,128,150,.1);color:#718096;">⚪ Cajero</span>
+    </div>
+  </div>
+</div>
+</body>
+</html>

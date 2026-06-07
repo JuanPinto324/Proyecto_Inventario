@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block title %}Ticket {{ sale.invoice_number }} — PyCommerceX{% endblock %}
+{% block topbar_title %}Comprobante de Venta{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1>🧾 Comprobante de Venta</h1>
+  <div class="flex-gap">
+    <button onclick="window.print()" class="btn btn-primary">🖨 Imprimir</button>
+    <a href="{{ url_for('pos.index') }}" class="btn btn-outline">← Nueva Venta</a>
+  </div>
+</div>
+
+<div class="ticket" id="ticket">
+  <div class="ticket-header">
+    <strong style="font-size:1.1rem">🛒 PyCommerceX</strong><br>
+    <span style="color:#666;font-size:.8rem">Sistema de Gestión Comercial</span>
+  </div>
+  <hr class="ticket-divider">
+
+  <div class="ticket-row">
+    <span>Factura:</span>
+    <strong>{{ sale.invoice_number }}</strong>
+  </div>
+  <div class="ticket-row">
+    <span>Fecha:</span>
+    <span>{{ sale.created_at.strftime('%d/%m/%Y %H:%M') }}</span>
+  </div>
+  <div class="ticket-row">
+    <span>Cajero:</span>
+    <span>{{ sale.cashier.full_name }}</span>
+  </div>
+
+  <hr class="ticket-divider">
+
+  <div class="ticket-row">
+    <span>Cliente:</span>
+    <strong>{{ sale.customer_name }}</strong>
+  </div>
+  <div class="ticket-row">
+    <span>ID:</span>
+    <span>{{ sale.customer_id }}</span>
+  </div>
+  {% if sale.customer_phone %}
+  <div class="ticket-row"><span>Tel:</span><span>{{ sale.customer_phone }}</span></div>
+  {% endif %}
+  {% if sale.customer_email %}
+  <div class="ticket-row"><span>Email:</span><span>{{ sale.customer_email }}</span></div>
+  {% endif %}
+
+  <hr class="ticket-divider">
+
+  <!-- Items -->
+  <div style="margin-bottom:8px;font-weight:700">ARTÍCULOS</div>
+  {% for item in sale.items %}
+  <div class="ticket-row">
+    <span style="flex:1">{{ item.product.name }}</span>
+  </div>
+  <div class="ticket-row" style="color:#555;padding-left:10px">
+    <span>{{ item.quantity }} x $ {{ "{:,}".format(item.unit_price) }}</span>
+    <span>$ {{ "{:,}".format(item.subtotal) }}</span>
+  </div>
+  {% endfor %}
+
+  <hr class="ticket-divider">
+
+  <div class="ticket-row ticket-total">
+    <span>TOTAL</span>
+    <strong>$ {{ "{:,}".format(sale.total) }}</strong>
+  </div>
+
+  <hr class="ticket-divider">
+  <p style="text-align:center;color:#888;font-size:.75rem;margin-top:8px">
+    ¡Gracias por su compra!
+  </p>
+</div>
+
+<style>
+@media print {
+  .sidebar, .topbar, .page-header, .btn { display: none !important; }
+  .main-content { margin-left: 0; }
+  .page-body { padding: 0; }
+  .ticket { box-shadow: none; border: none; max-width: 100%; }
+}
+</style>
+{% endblock %}

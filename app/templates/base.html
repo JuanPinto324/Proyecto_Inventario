@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}PyCommerceX{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛒</text></svg>">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="logo-icon">🛒</div>
+      <span>PyCommerceX</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      {% if current_user.role in ('jefe', 'administrador') %}
+      <div class="nav-section-label">Principal</div>
+      <a href="{{ url_for('dashboard.index') }}"
+         class="nav-item {% if request.endpoint == 'dashboard.index' %}active{% endif %}">
+        <span class="nav-icon">📊</span> Panel Principal
+      </a>
+
+      <div class="nav-section-label">Gestión</div>
+      <a href="{{ url_for('sales.index') }}"
+         class="nav-item {% if request.blueprint == 'sales' %}active{% endif %}">
+        <span class="nav-icon">📋</span> Historial de Ventas
+      </a>
+      <a href="{{ url_for('inventory.index') }}"
+         class="nav-item {% if request.blueprint == 'inventory' %}active{% endif %}">
+        <span class="nav-icon">📦</span> Inventario
+      </a>
+      <a href="{{ url_for('users.index') }}"
+         class="nav-item {% if request.blueprint == 'users' %}active{% endif %}">
+        <span class="nav-icon">👥</span> Usuarios
+      </a>
+      <div class="nav-section-label">Operaciones</div>
+      {% endif %}
+      <a href="{{ url_for('pos.index') }}"
+         class="nav-item {% if request.blueprint == 'pos' %}active{% endif %}">
+        <span class="nav-icon">🛒</span> Punto de Venta
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-chip">
+        <div class="user-avatar"
+             style="background: {{ current_user.role_color }}22; color: {{ current_user.role_color }};">
+          {{ current_user.full_name[0].upper() }}
+        </div>
+        <div class="user-info">
+          <div class="user-name">{{ current_user.full_name }}</div>
+          <div class="user-role" style="color: {{ current_user.role_color }};">
+            {{ current_user.role_label }}
+          </div>
+        </div>
+        <a href="{{ url_for('auth.logout') }}" class="btn-logout" title="Cerrar sesión">⏻</a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main-content">
+    <header class="topbar">
+      <button class="btn btn-outline btn-sm" id="menuToggle" style="display:none">☰</button>
+      <span class="topbar-title">{% block topbar_title %}{% endblock %}</span>
+      <div class="flex-gap">
+        <span class="badge badge-muted" style="color: {{ current_user.role_color }};">
+          {{ current_user.role_label }}
+        </span>
+      </div>
+    </header>
+
+    <main class="page-body">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">
+              <span>{{ '✓' if category == 'success' else '✕' if category == 'danger' else 'ℹ' }}</span>
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+
+</div>
+<script>
+  const toggle = document.getElementById('menuToggle');
+  const sidebar = document.getElementById('sidebar');
+  if (toggle) toggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+  if (window.innerWidth <= 900 && toggle) toggle.style.display = 'inline-flex';
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>
