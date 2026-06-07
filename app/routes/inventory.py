@@ -43,21 +43,54 @@ def new():
         stock      = int(request.form.get('stock', 0))
         min_stock  = int(request.form.get('min_stock', 5))
 
-        if Product.query.filter_by(code=code).first():
+        # Buscar producto existente (activo o eliminado)
+        existing_product = Product.query.filter_by(code=code).first()
+
+        if existing_product:
+            # Si fue eliminado previamente, lo reactivamos
+            if not existing_product.is_active:
+                existing_product.name = name
+                existing_product.cost_price = cost_price
+                existing_product.sell_price = sell_price
+                existing_product.stock = stock
+                existing_product.min_stock = min_stock
+                existing_product.is_active = True
+
+                db.session.commit()
+
+                flash(
+                    f'Producto "{name}" restaurado exitosamente.',
+                    'success'
+                )
+                return redirect(url_for('inventory.index'))
+
             flash('Ya existe un producto con ese código.', 'danger')
             return redirect(url_for('inventory.new'))
 
         product = Product(
-            code=code, name=name,
-            cost_price=cost_price, sell_price=sell_price,
-            stock=stock, min_stock=min_stock
+            code=code,
+            name=name,
+            cost_price=cost_price,
+            sell_price=sell_price,
+            stock=stock,
+            min_stock=min_stock
         )
+
         db.session.add(product)
         db.session.commit()
-        flash(f'Producto "{name}" registrado exitosamente.', 'success')
+
+        flash(
+            f'Producto "{name}" registrado exitosamente.',
+            'success'
+        )
+
         return redirect(url_for('inventory.index'))
 
-    return render_template('inventory/form.html', product=None, action='Nuevo')
+    return render_template(
+        'inventory/form.html',
+        product=None,
+        action='Nuevo'
+    )
 
 
 @inventory_bp.route('/edit/<int:product_id>', methods=['GET', 'POST'])
