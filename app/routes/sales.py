@@ -2,8 +2,10 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required, current_user
 from app.models import Sale, SaleItem, Return, Product
 from app import db
-from datetime import date, timedelta, datetime
+from datetime import timedelta
+from zoneinfo import ZoneInfo
 from sqlalchemy import func
+import datetime
 from functools import wraps
 from flask import abort
 
@@ -26,7 +28,7 @@ def index():
     filter_type = request.args.get('filter', 'today')
     date_from   = request.args.get('from', '')
     date_to     = request.args.get('to', '')
-    today = date.today()
+    today = datetime.datetime.now(ZoneInfo("America/Bogota")).date()
 
     query = Sale.query
     if filter_type == 'today':

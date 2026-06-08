@@ -2,8 +2,8 @@ from flask import Blueprint, render_template
 from flask_login import login_required, current_user
 from app.models import Product, Sale, SaleItem
 from app import db
-from datetime import date
-from sqlalchemy import func
+from zoneinfo import ZoneInfo
+import datetime
 from functools import wraps
 from flask import abort
 
@@ -23,7 +23,7 @@ def admin_required(f):
 @login_required
 @admin_required
 def index():
-    today = date.today()
+    today = datetime.datetime.now(ZoneInfo("America/Bogota")).date()
 
     # Ventas del día
     sales_today = Sale.query.filter(
