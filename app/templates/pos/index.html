@@ -37,6 +37,10 @@
     box-shadow: var(--shadow-lg);
   }
   .modal h3 { margin-bottom: 16px; }
+  .section-label {
+    font-size: .75rem; font-weight: 600; text-transform: uppercase;
+    letter-spacing: .7px; color: var(--text-muted); margin-bottom: 8px;
+  }
 </style>
 {% endblock %}
 
@@ -46,10 +50,60 @@
   <!-- LEFT: Products -->
   <div class="pos-products">
     <div class="search-bar mb-2">
-      <input type="text" id="prodSearch" class="form-control" placeholder="Buscar producto por nombre o código…">
+      <input type="text" id="prodSearch" class="form-control"
+             placeholder="Buscar producto por nombre o código…">
     </div>
-    <div class="products-grid" id="productsGrid">
-      <p class="text-muted" style="padding:12px">Escribe para buscar productos…</p>
+
+    <!-- Resultados de búsqueda (ocultos por defecto) -->
+    <div id="searchSection" style="display:none">
+      <div class="section-label">🔍 Resultados</div>
+      <div class="products-grid" id="searchResults"></div>
+    </div>
+
+    <!-- Contenido normal (visible por defecto) -->
+    <div id="normalSection">
+
+      <!-- Más vendidos -->
+      {% if top_products %}
+      <div id="topSection" class="mb-2">
+        <div class="section-label">🔥 Más Vendidos</div>
+        <div class="products-grid">
+          {% for p in top_products %}
+          <div class="prod-card"
+               data-id="{{ p.id }}"
+               data-name="{{ p.name }}"
+               data-price="{{ p.sell_price }}"
+               data-stock="{{ p.stock }}"
+               onclick="addFromCard(this)">
+            <span class="prod-code">{{ p.code }}</span>
+            <span class="prod-name">{{ p.name }}</span>
+            <span class="prod-price">$ {{ "{:,}".format(p.sell_price) }}</span>
+            <span class="prod-stock">Stock: {{ p.stock }}</span>
+          </div>
+          {% endfor %}
+        </div>
+        <hr class="divider">
+      </div>
+      {% endif %}
+
+      <!-- Todos los productos -->
+      <div class="section-label">📦 Todos los Productos</div>
+      <div class="products-grid" id="productsGrid">
+        {% for p in products %}
+        <div class="prod-card"
+             data-id="{{ p.id }}"
+             data-name="{{ p.name }}"
+             data-price="{{ p.sell_price }}"
+             data-stock="{{ p.stock }}"
+             onclick="addFromCard(this)">
+          <span class="prod-code">{{ p.code }}</span>
+          <span class="prod-name">{{ p.name }}</span>
+          <span class="prod-price">$ {{ "{:,}".format(p.sell_price) }}</span>
+          <span class="prod-stock">Stock: {{ p.stock }}</span>
+        </div>
+        {% endfor %}
+      </div>
+
     </div>
   </div>
 
@@ -109,25 +163,46 @@
 
 {% block extra_js %}
 <script>
-let cart = {};   // { product_id: { name, price, qty, stock } }
+let cart = {};
 let searchTimeout;
 
-// ── Product Search ──────────────────────────────────────────
+// ── Agregar desde tarjeta con data attributes ───────────────
+function addFromCard(el) {
+  const id    = parseInt(el.dataset.id);
+  const name  = el.dataset.name;
+  const price = parseInt(el.dataset.price);
+  const stock = parseInt(el.dataset.stock);
+  addToCart(id, name, price, stock);
+}
+
+// ── Búsqueda ────────────────────────────────────────────────
 const searchInput = document.getElementById('prodSearch');
 searchInput.addEventListener('input', () => {
   clearTimeout(searchTimeout);
   const q = searchInput.value.trim();
-  if (!q) { document.getElementById('productsGrid').innerHTML = '<p class="text-muted" style="padding:12px">Escribe para buscar productos…</p>'; return; }
+  if (!q) {
+    document.getElementById('searchSection').style.display = 'none';
+    document.getElementById('normalSection').style.display = '';
+    return;
+  }
+  document.getElementById('searchSection').style.display = '';
+  document.getElementById('normalSection').style.display = 'none';
   searchTimeout = setTimeout(() => searchProducts(q), 250);
 });
 
 async function searchProducts(q) {
-  const res = await fetch(`/inventory/api/search?q=${encodeURIComponent(q)}`);
+  const res  = await fetch(`/inventory/api/search?q=${encodeURIComponent(q)}`);
   const data = await res.json();
-  const grid = document.getElementById('productsGrid');
-  if (!data.length) { grid.innerHTML = '<p class="text-muted" style="padding:12px">Sin resultados.</p>'; return; }
+  const grid = document.getElementById('searchResults');
+  if (!data.length) {
+    grid.innerHTML = '<p class="text-muted" style="padding:12px">Sin resultados.</p>';
+    return;
+  }
   grid.innerHTML = data.map(p => `
-    <div class="prod-card" onclick="addToCart(${p.id},'${esc(p.name)}',${p.sell_price},${p.stock})">
+    <div class="prod-card"
+         data-id="${p.id}" data-name="${esc(p.name)}"
+         data-price="${p.sell_price}" data-stock="${p.stock}"
+         onclick="addFromCard(this)">
       <span class="prod-code">${p.code}</span>
       <span class="prod-name">${p.name}</span>
       <span class="prod-price">$ ${fmt(p.sell_price)}</span>
@@ -157,8 +232,8 @@ function changeQty(id, delta) {
 function clearCart() { cart = {}; renderCart(); }
 
 function renderCart() {
-  const body  = document.getElementById('cartBody');
-  const keys  = Object.keys(cart);
+  const body = document.getElementById('cartBody');
+  const keys = Object.keys(cart);
   if (!keys.length) {
     body.innerHTML = '<p class="text-muted text-center" style="padding:20px;font-size:.85rem">Carrito vacío</p>';
     document.getElementById('cartTotal').textContent = '$ 0';
@@ -167,7 +242,7 @@ function renderCart() {
   let total = 0;
   body.innerHTML = keys.map(id => {
     const item = cart[id];
-    const sub = item.price * item.qty;
+    const sub  = item.price * item.qty;
     total += sub;
     return `
       <div class="cart-item">
@@ -188,7 +263,9 @@ function openCheckout() {
   if (!Object.keys(cart).length) { alert('El carrito está vacío.'); return; }
   document.getElementById('checkoutModal').classList.add('show');
 }
-function closeCheckout() { document.getElementById('checkoutModal').classList.remove('show'); }
+function closeCheckout() {
+  document.getElementById('checkoutModal').classList.remove('show');
+}
 
 async function confirmSale() {
   const custId    = document.getElementById('custId').value.trim();
