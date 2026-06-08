@@ -13,20 +13,26 @@
     {% if not product %}
     <div class="form-group">
       <label class="form-label">Código único *</label>
-      <input type="text" name="code" class="form-control" placeholder="Ej: PROD-001" required
+      <input type="text" name="code" class="form-control" required
+             value="{{ suggested_code }}"
              style="font-family:var(--font-mono)">
+      <small style="color:var(--text-muted);font-size:.75rem;margin-top:4px;display:block">
+        🤖 Código asignado automáticamente. Puedes modificarlo si lo necesitas.
+      </small>
     </div>
     {% else %}
     <div class="form-group">
       <label class="form-label">Código</label>
-      <input type="text" class="form-control" value="{{ product.code }}" disabled style="font-family:var(--font-mono)">
+      <input type="text" class="form-control" value="{{ product.code }}" disabled
+             style="font-family:var(--font-mono)">
     </div>
     {% endif %}
 
     <div class="form-group">
       <label class="form-label">Nombre del Producto *</label>
       <input type="text" name="name" class="form-control" required
-             value="{{ product.name if product else '' }}" placeholder="Nombre del producto">
+             value="{{ product.name if product else '' }}"
+             placeholder="Nombre del producto">
     </div>
 
     <div class="form-grid-2">
