@@ -4,7 +4,7 @@ from app.models import Product, Sale, SaleItem
 from app import db
 from sqlalchemy import func
 from zoneinfo import ZoneInfo
-import datetime
+from datetime import datetime
 from functools import wraps
 from flask import abort
 
@@ -24,30 +24,36 @@ def admin_required(f):
 @login_required
 @admin_required
 def index():
-    today = datetime.datetime.now(ZoneInfo("America/Bogota")).date()
+    bogota = ZoneInfo("America/Bogota")
+    now_bogota = datetime.now(bogota)
+    today = now_bogota.date()
+    start = datetime(today.year, today.month, today.day, 0, 0, 0, tzinfo=bogota)
+    end   = datetime(today.year, today.month, today.day, 23, 59, 59, tzinfo=bogota)
 
     # Ventas del día
     sales_today = Sale.query.filter(
-        func.date(Sale.created_at) == today,
+        Sale.created_at >= start,
+        Sale.created_at <= end,
         Sale.is_returned == False
     ).all()
-    total_today   = sum(s.total for s in sales_today)
+    total_today    = sum(s.total for s in sales_today)
     invoices_today = len(sales_today)
 
     # Artículos vendidos hoy
     items_today = db.session.query(func.sum(SaleItem.quantity)).join(Sale).filter(
-        func.date(Sale.created_at) == today,
+        Sale.created_at >= start,
+        Sale.created_at <= end,
         Sale.is_returned == False
     ).scalar() or 0
 
     # Productos
-    total_products   = Product.query.filter_by(is_active=True).count()
-    low_stock_prods  = Product.query.filter(
+    total_products  = Product.query.filter_by(is_active=True).count()
+    low_stock_prods = Product.query.filter(
         Product.is_active == True,
         Product.stock > 0,
         Product.stock <= Product.min_stock
     ).all()
-    out_of_stock     = Product.query.filter_by(is_active=True, stock=0).all()
+    out_of_stock    = Product.query.filter_by(is_active=True, stock=0).all()
 
     alert_products = low_stock_prods + out_of_stock
 

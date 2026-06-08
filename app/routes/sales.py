@@ -28,13 +28,24 @@ def index():
     filter_type = request.args.get('filter', 'today')
     date_from   = request.args.get('from', '')
     date_to     = request.args.get('to', '')
-    today = datetime.datetime.now(ZoneInfo("America/Bogota")).date()
+    
+    from zoneinfo import ZoneInfo
+    from datetime import datetime, timedelta
+    bogota = ZoneInfo("America/Bogota")
+    now_bogota = datetime.now(bogota)
+    today = now_bogota.date()
 
     query = Sale.query
     if filter_type == 'today':
-        query = query.filter(func.date(Sale.created_at) == today)
+        # Convertir inicio y fin del día Colombia a UTC para comparar con la BD
+        start = datetime(today.year, today.month, today.day, 0, 0, 0, tzinfo=bogota)
+        end   = datetime(today.year, today.month, today.day, 23, 59, 59, tzinfo=bogota)
+        query = query.filter(Sale.created_at >= start, Sale.created_at <= end)
     elif filter_type == 'yesterday':
-        query = query.filter(func.date(Sale.created_at) == today - timedelta(days=1))
+        yesterday = today - timedelta(days=1)
+        start = datetime(yesterday.year, yesterday.month, yesterday.day, 0, 0, 0, tzinfo=bogota)
+        end   = datetime(yesterday.year, yesterday.month, yesterday.day, 23, 59, 59, tzinfo=bogota)
+        query = query.filter(Sale.created_at >= start, Sale.created_at <= end)
     elif filter_type == 'range' and date_from and date_to:
         query = query.filter(
             func.date(Sale.created_at) >= date_from,
@@ -43,12 +54,12 @@ def index():
 
     sales = query.order_by(Sale.created_at.desc()).all()
 
-    total_amount    = sum(s.total for s in sales if not s.is_returned)
-    total_invoices  = len([s for s in sales if not s.is_returned])
-    total_items     = sum(
+    total_amount   = sum(s.total for s in sales if not s.is_returned)
+    total_invoices = len([s for s in sales if not s.is_returned])
+    total_items    = sum(
         sum(i.quantity for i in s.items) for s in sales if not s.is_returned
     )
-    total_returns   = len([s for s in sales if s.is_returned])
+    total_returns  = len([s for s in sales if s.is_returned])
 
     return render_template('sales/index.html',
         sales=sales,
