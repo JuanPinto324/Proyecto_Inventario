@@ -76,11 +76,5 @@ def complete():
 @pos_bp.route('/ticket/<int:sale_id>')
 @login_required
 def ticket(sale_id):
-    from zoneinfo import ZoneInfo
-    from datetime import timezone
     sale = Sale.query.get_or_404(sale_id)
-    if sale.created_at is not None:
-        if sale.created_at.tzinfo is None:
-            sale.created_at = sale.created_at.replace(tzinfo=timezone.utc)
-        sale.created_at = sale.created_at.astimezone(ZoneInfo("America/Bogota"))
     return render_template('pos/ticket.html', sale=sale)

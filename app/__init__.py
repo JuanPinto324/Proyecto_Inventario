@@ -41,6 +41,18 @@ def create_app():
     login_manager.login_message = 'Por favor inicia sesión para continuar.'
     login_manager.login_message_category = 'warning'
 
+    # ── Filtro de zona horaria Colombia ────────────────────────────
+    from zoneinfo import ZoneInfo
+    from datetime import timezone as tz_utc
+
+    @app.template_filter('col_time')
+    def col_time_filter(dt):
+        if dt is None:
+            return ''
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=tz_utc.utc)
+        return dt.astimezone(ZoneInfo("America/Bogota")).strftime('%d/%m/%Y %H:%M')
+
     # ── Blueprints ─────────────────────────────────────────────────
     from app.routes.auth import auth_bp
     from app.routes.dashboard import dashboard_bp

@@ -58,7 +58,7 @@
         {% for s in sales %}
         <tr>
           <td><code>{{ s.invoice_number }}</code></td>
-          <td>{{ s.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+          <td>{{ s.created_at | col_time }}</td>
           <td>{{ s.customer_name }}</td>
           <td>{{ s.cashier.full_name }}</td>
           <td>$ {{ "{:,}".format(s.total) }}</td>

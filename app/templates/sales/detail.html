@@ -19,7 +19,7 @@
     <h3 class="mb-2">📋 Información de Venta</h3>
     <table style="width:100%">
       <tr><td class="text-muted">Factura</td><td><code>{{ sale.invoice_number }}</code></td></tr>
-      <tr><td class="text-muted">Fecha</td><td>{{ sale.created_at.strftime('%d/%m/%Y %H:%M') }}</td></tr>
+      <tr><td class="text-muted">Fecha</td><td>{{ sale.created_at | col_time }}</td></tr>
       <tr><td class="text-muted">Cajero</td><td>{{ sale.cashier.full_name }}</td></tr>
       <tr><td class="text-muted">Estado</td><td>
         {% if sale.is_returned %}

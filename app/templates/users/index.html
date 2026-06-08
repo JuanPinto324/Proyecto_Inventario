@@ -42,7 +42,7 @@
               {{ u.role_label }}
             </span>
           </td>
-          <td>{{ u.created_at.strftime('%d/%m/%Y') }}</td>
+          <td>{{ u.created_at | col_time }}</td>
           <td>
             <div class="flex-gap" style="justify-content:flex-end">
               {% set can_edit = (current_user.role == 'jefe') or (current_user.role == 'administrador' and u.role == 'cajero') %}
