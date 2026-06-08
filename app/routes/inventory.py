@@ -19,7 +19,10 @@ def admin_required(f):
 
 def _next_product_code():
     """Encuentra el primer código PROD-XXX disponible en la secuencia."""
-    all_products = Product.query.filter(Product.code.like('PROD-%')).all()
+    all_products = Product.query.filter(
+        Product.code.like('PROD-%'),
+        Product.is_active == True
+    ).all()
 
     used_numbers = set()
     for p in all_products:
@@ -138,4 +141,3 @@ def api_search():
         'id': p.id, 'code': p.code, 'name': p.name,
         'sell_price': p.sell_price, 'stock': p.stock
     } for p in products])
-    
