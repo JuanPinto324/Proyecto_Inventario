@@ -47,9 +47,17 @@ def index():
         end   = datetime(yesterday.year, yesterday.month, yesterday.day, 23, 59, 59, tzinfo=bogota)
         query = query.filter(Sale.created_at >= start, Sale.created_at <= end)
     elif filter_type == 'range' and date_from and date_to:
+        from datetime import datetime
+        bogota = ZoneInfo("America/Bogota")
+        start_range = datetime.strptime(date_from, '%Y-%m-%d').replace(
+            hour=0, minute=0, second=0, tzinfo=bogota
+        )
+        end_range = datetime.strptime(date_to, '%Y-%m-%d').replace(
+            hour=23, minute=59, second=59, tzinfo=bogota
+        )
         query = query.filter(
-            func.date(Sale.created_at) >= date_from,
-            func.date(Sale.created_at) <= date_to
+            Sale.created_at >= start_range,
+            Sale.created_at <= end_range
         )
 
     sales = query.order_by(Sale.created_at.desc()).all()
