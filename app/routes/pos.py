@@ -1,8 +1,9 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify, session
+from flask import Blueprint, render_template, request, jsonify
 from flask_login import login_required, current_user
 from app.models import Product, Sale, SaleItem
 from app import db
-from datetime import datetime
+from sqlalchemy import func
+
 
 pos_bp = Blueprint('pos', __name__, url_prefix='/pos')
 
@@ -16,7 +17,27 @@ def _next_invoice():
 @pos_bp.route('/')
 @login_required
 def index():
-    return render_template('pos/index.html')
+    # Todos los productos disponibles
+    products = Product.query.filter(
+        Product.is_active == True,
+        Product.stock > 0
+    ).order_by(Product.name).all()
+
+    # Top 5 más vendidos
+    top_ids = db.session.query(
+        SaleItem.product_id,
+        func.sum(SaleItem.quantity).label('total_vendido')
+    ).group_by(SaleItem.product_id)\
+     .order_by(func.sum(SaleItem.quantity).desc())\
+     .limit(5).all()
+
+    top_products = []
+    for row in top_ids:
+        p = Product.query.get(row.product_id)
+        if p and p.is_active and p.stock > 0:
+            top_products.append(p)
+
+    return render_template('pos/index.html', products=products, top_products=top_products)
 
 
 @pos_bp.route('/complete', methods=['POST'])
@@ -45,7 +66,6 @@ def complete():
         total += subtotal
         validated.append((product, item['quantity'], product.sell_price, subtotal))
 
-    # Crear venta
     sale = Sale(
         invoice_number=_next_invoice(),
         customer_id=customer_id,
@@ -56,7 +76,7 @@ def complete():
         cashier_id=current_user.id
     )
     db.session.add(sale)
-    db.session.flush()   # obtener sale.id
+    db.session.flush()
 
     for product, qty, price, subtotal in validated:
         item_row = SaleItem(
@@ -67,7 +87,7 @@ def complete():
             subtotal=subtotal
         )
         db.session.add(item_row)
-        product.stock -= qty   # descontar stock
+        product.stock -= qty
 
     db.session.commit()
     return jsonify({'ok': True, 'sale_id': sale.id, 'invoice': sale.invoice_number})
