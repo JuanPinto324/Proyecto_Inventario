@@ -30,7 +30,7 @@ class User(UserMixin, db.Model):
     role           = db.Column(db.String(20), nullable=False, default='cajero')
     # 'jefe' | 'administrador' | 'cajero'
     is_active      = db.Column(db.Boolean, default=True)
-    created_at = db.Column(db.DateTime, default=colombia_now)
+    created_at = db.Column(db.DateTime(timezone=True), default=colombia_now)
 
     # Relaciones
     sales = db.relationship('Sale', backref='cashier', lazy=True)
@@ -69,8 +69,8 @@ class Product(db.Model):
     stock        = db.Column(db.Integer, nullable=False, default=0)
     min_stock    = db.Column(db.Integer, nullable=False, default=5)
     is_active    = db.Column(db.Boolean, default=True)
-    created_at   = db.Column(db.DateTime, default=colombia_now)
-    updated_at   = db.Column(db.DateTime, default=colombia_now, onupdate=colombia_now)
+    created_at = db.Column(db.DateTime(timezone=True), default=colombia_now)
+    updated_at = db.Column(db.DateTime(timezone=True), default=colombia_now, onupdate=colombia_now)
 
     # Relaciones
     sale_items = db.relationship('SaleItem', backref='product', lazy=True)
@@ -109,7 +109,7 @@ class Sale(db.Model):
     customer_email  = db.Column(db.String(120))
     total           = db.Column(db.Integer, nullable=False, default=0)
     cashier_id      = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    created_at      = db.Column(db.DateTime, default=colombia_now)
+    created_at = db.Column(db.DateTime(timezone=True), default=colombia_now)
     is_returned     = db.Column(db.Boolean, default=False)
 
     # Relaciones
@@ -146,7 +146,7 @@ class Return(db.Model):
     sale_id     = db.Column(db.Integer, db.ForeignKey('sales.id'), nullable=False)
     reason      = db.Column(db.Text)
     processed_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    created_at  = db.Column(db.DateTime, default=colombia_now)
+    created_at = db.Column(db.DateTime(timezone=True), default=colombia_now)
 
     sale       = db.relationship('Sale', backref='returns')
     processor  = db.relationship('User', backref='returns_processed')
