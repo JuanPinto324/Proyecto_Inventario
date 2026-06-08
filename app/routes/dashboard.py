@@ -2,6 +2,7 @@ from flask import Blueprint, render_template
 from flask_login import login_required, current_user
 from app.models import Product, Sale, SaleItem
 from app import db
+from sqlalchemy import func
 from zoneinfo import ZoneInfo
 import datetime
 from functools import wraps
