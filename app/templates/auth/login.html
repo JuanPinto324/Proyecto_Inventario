@@ -6,6 +6,7 @@
   <title>PyCommerceX - Iniciar Sesión</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
   <style>
     body {
       min-height: 100vh;
@@ -65,20 +66,9 @@
       transform: translateY(-50%);
     }
     .input-with-icon .form-control { padding-left: 40px; }
-    .captcha-box {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 10px;
-      padding: 12px 14px;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      background: var(--bg-soft);
-    }
-    .captcha-question { color: var(--accent); font-family: var(--font-mono); font-size: 1.05rem; font-weight: 800; }
     .roles-info { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 22px; }
     .role-chip { padding: 5px 10px; border-radius: 999px; font-size: .72rem; font-weight: 800; }
+    .cf-turnstile { margin-top: 4px; }
     @media (max-width: 860px) {
       .login-shell { grid-template-columns: 1fr; max-width: 440px; }
       .login-aside { min-height: auto; padding: 28px; gap: 28px; }
@@ -137,16 +127,18 @@
                  placeholder="Tu contraseña" required>
         </div>
       </div>
+
+      <!-- Cloudflare Turnstile -->
       <div class="form-group">
-        <label class="form-label">Verificación CAPTCHA</label>
-        <div class="captcha-box">
-          <span class="captcha-question">{{ captcha_question }}</span>
-          <span class="badge badge-muted">Resolver</span>
+        <label class="form-label">Verificación de seguridad</label>
+        <div class="cf-turnstile"
+             data-sitekey="0x4AAAAAADhGN7GbA8XKhpC7"
+             data-theme="light"
+             data-language="es">
         </div>
-        <input type="number" name="captcha_answer" class="form-control"
-               placeholder="Respuesta" required min="0" max="20">
       </div>
-      <button type="submit" class="btn btn-primary btn-lg" style="width:100%;">
+
+      <button type="submit" class="btn btn-primary btn-lg" style="width:100%;margin-top:4px">
         <i data-lucide="log-in"></i> Entrar al sistema
       </button>
     </form>
