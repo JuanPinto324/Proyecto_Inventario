@@ -5,17 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}PyCommerceX{% endblock %}</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛒</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='18' fill='%232563eb'/%3E%3Cpath d='M25 28h9l5 30h30l6-21H39' fill='none' stroke='white' stroke-width='7' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='44' cy='72' r='5' fill='white'/%3E%3Ccircle cx='65' cy='72' r='5' fill='white'/%3E%3C/svg%3E">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
   {% block extra_head %}{% endblock %}
 </head>
 <body>
 <div class="wrapper">
-
-  <!-- SIDEBAR -->
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-brand">
-      <div class="logo-icon">🛒</div>
-      <span>PyCommerceX</span>
+      <div class="logo-icon"><i data-lucide="shopping-cart"></i></div>
+      <div>
+        <span>PyCommerceX</span>
+        <small class="brand-subtitle">Inventario y ventas</small>
+      </div>
     </div>
 
     <nav class="sidebar-nav">
@@ -23,27 +25,27 @@
       <div class="nav-section-label">Principal</div>
       <a href="{{ url_for('dashboard.index') }}"
          class="nav-item {% if request.endpoint == 'dashboard.index' %}active{% endif %}">
-        <span class="nav-icon">📊</span> Panel Principal
+        <span class="nav-icon"><i data-lucide="layout-dashboard"></i></span> Panel Principal
       </a>
 
       <div class="nav-section-label">Gestión</div>
       <a href="{{ url_for('sales.index') }}"
          class="nav-item {% if request.blueprint == 'sales' %}active{% endif %}">
-        <span class="nav-icon">📋</span> Historial de Ventas
+        <span class="nav-icon"><i data-lucide="receipt-text"></i></span> Historial de Ventas
       </a>
       <a href="{{ url_for('inventory.index') }}"
          class="nav-item {% if request.blueprint == 'inventory' %}active{% endif %}">
-        <span class="nav-icon">📦</span> Inventario
+        <span class="nav-icon"><i data-lucide="boxes"></i></span> Inventario
       </a>
       <a href="{{ url_for('users.index') }}"
          class="nav-item {% if request.blueprint == 'users' %}active{% endif %}">
-        <span class="nav-icon">👥</span> Usuarios
+        <span class="nav-icon"><i data-lucide="users"></i></span> Usuarios
       </a>
       <div class="nav-section-label">Operaciones</div>
       {% endif %}
       <a href="{{ url_for('pos.index') }}"
          class="nav-item {% if request.blueprint == 'pos' %}active{% endif %}">
-        <span class="nav-icon">🛒</span> Punto de Venta
+        <span class="nav-icon"><i data-lucide="scan-barcode"></i></span> Punto de Venta
       </a>
     </nav>
 
@@ -59,21 +61,24 @@
             {{ current_user.role_label }}
           </div>
         </div>
-        <a href="{{ url_for('auth.logout') }}" class="btn-logout" title="Cerrar sesión">⏻</a>
+        <a href="{{ url_for('auth.logout') }}" class="btn-logout" title="Cerrar sesión" aria-label="Cerrar sesión">
+          <i data-lucide="log-out"></i>
+        </a>
       </div>
     </div>
   </aside>
 
-  <!-- MAIN -->
   <div class="main-content">
     <header class="topbar">
-      <button class="btn btn-outline btn-sm" id="menuToggle" style="display:none">☰</button>
-      <span class="topbar-title">{% block topbar_title %}{% endblock %}</span>
       <div class="flex-gap">
-        <span class="badge badge-muted" style="color: {{ current_user.role_color }};">
-          {{ current_user.role_label }}
-        </span>
+        <button class="btn btn-outline btn-sm" id="menuToggle" style="display:none" aria-label="Abrir menú">
+          <i data-lucide="menu"></i>
+        </button>
+        <span class="topbar-title">{% block topbar_title %}{% endblock %}</span>
       </div>
+      <span class="badge badge-muted" style="color: {{ current_user.role_color }};">
+        {{ current_user.role_label }}
+      </span>
     </header>
 
     <main class="page-body">
@@ -81,7 +86,7 @@
         {% if messages %}
           {% for category, message in messages %}
             <div class="alert alert-{{ category }}">
-              <span>{{ '✓' if category == 'success' else '✕' if category == 'danger' else 'ℹ' }}</span>
+              <i data-lucide="{{ 'check-circle-2' if category == 'success' else 'x-circle' if category == 'danger' else 'info' }}"></i>
               {{ message }}
             </div>
           {% endfor %}
@@ -91,13 +96,22 @@
       {% block content %}{% endblock %}
     </main>
   </div>
-
 </div>
+
 <script>
-  const toggle = document.getElementById('menuToggle');
-  const sidebar = document.getElementById('sidebar');
-  if (toggle) toggle.addEventListener('click', () => sidebar.classList.toggle('open'));
-  if (window.innerWidth <= 900 && toggle) toggle.style.display = 'inline-flex';
+  window.addEventListener('DOMContentLoaded', () => {
+    if (window.lucide) window.lucide.createIcons();
+
+    const toggle = document.getElementById('menuToggle');
+    const sidebar = document.getElementById('sidebar');
+    const updateMenu = () => {
+      if (toggle) toggle.style.display = window.innerWidth <= 980 ? 'inline-flex' : 'none';
+    };
+
+    if (toggle) toggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+    window.addEventListener('resize', updateMenu);
+    updateMenu();
+  });
 </script>
 {% block extra_js %}{% endblock %}
 </body>

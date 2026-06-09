@@ -3,45 +3,114 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PyCommerceX — Iniciar Sesión</title>
+  <title>PyCommerceX - Iniciar Sesión</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
   <style>
-    body { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: var(--bg-base); }
-    .login-wrap { width: 100%; max-width: 400px; padding: 16px; }
-    .login-box {
-      background: var(--bg-surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 36px 32px;
-      box-shadow: var(--shadow-lg);
+    body {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background:
+        linear-gradient(135deg, rgba(16, 24, 39, .92), rgba(16, 24, 39, .72)),
+        radial-gradient(circle at 18% 18%, rgba(37, 99, 235, .55), transparent 32rem),
+        radial-gradient(circle at 86% 80%, rgba(15, 159, 110, .38), transparent 28rem),
+        #101827;
     }
-    .login-logo { text-align: center; margin-bottom: 28px; }
-    .login-logo .icon { font-size: 2.5rem; display: block; margin-bottom: 8px; }
-    .login-logo h1 { font-size: 1.5rem; letter-spacing: -.5px; }
-    .login-logo p  { color: var(--text-muted); font-size: .85rem; margin-top: 4px; }
+    .login-shell {
+      width: 100%;
+      max-width: 920px;
+      display: grid;
+      grid-template-columns: 1fr 420px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, .16);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, .96);
+      box-shadow: 0 30px 90px rgba(0, 0, 0, .34);
+    }
+    .login-aside {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 560px;
+      padding: 36px;
+      color: #fff;
+      background: linear-gradient(180deg, #111827, #172236);
+    }
+    .login-brand { display: flex; align-items: center; gap: 12px; }
+    .login-brand h1 { color: #fff; font-size: 1.45rem; }
+    .login-copy h2 { color: #fff; max-width: 360px; font-size: 2rem; }
+    .login-copy p { max-width: 360px; margin-top: 12px; color: #aebbd0; }
+    .login-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .login-metric {
+      padding: 14px;
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, .08);
+      border: 1px solid rgba(255, 255, 255, .10);
+    }
+    .login-metric strong { display: block; color: #fff; font-size: 1rem; }
+    .login-metric span { color: #9fb0c8; font-size: .74rem; }
+    .login-panel { padding: 40px 34px; align-self: center; }
+    .login-panel h2 { font-size: 1.35rem; }
+    .login-panel > p { margin: 6px 0 24px; color: var(--text-muted); }
+    .input-with-icon { position: relative; }
+    .input-with-icon svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      width: 18px;
+      height: 18px;
+      color: var(--text-muted);
+      transform: translateY(-50%);
+    }
+    .input-with-icon .form-control { padding-left: 40px; }
     .captcha-box {
-      background: var(--bg-elevated);
-      border: 1px solid var(--border-light);
-      border-radius: var(--radius-sm);
-      padding: 10px 14px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 8px;
+      gap: 12px;
+      margin-bottom: 10px;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg-soft);
     }
-    .captcha-question { font-family: var(--font-mono); font-size: 1rem; font-weight: 600; color: var(--accent); }
-    .roles-info { display: flex; gap: 8px; margin-top: 24px; flex-wrap: wrap; justify-content: center; }
-    .role-chip { font-size: .72rem; padding: 3px 10px; border-radius: 20px; font-weight: 600; }
+    .captcha-question { color: var(--accent); font-family: var(--font-mono); font-size: 1.05rem; font-weight: 800; }
+    .roles-info { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 22px; }
+    .role-chip { padding: 5px 10px; border-radius: 999px; font-size: .72rem; font-weight: 800; }
+    @media (max-width: 860px) {
+      .login-shell { grid-template-columns: 1fr; max-width: 440px; }
+      .login-aside { min-height: auto; padding: 28px; gap: 28px; }
+      .login-copy h2 { font-size: 1.45rem; }
+      .login-metrics { display: none; }
+    }
   </style>
 </head>
 <body>
-<div class="login-wrap">
-  <div class="login-box">
-    <div class="login-logo">
-      <span class="icon">🛒</span>
-      <h1>PyCommerceX</h1>
-      <p>Sistema de Gestión Comercial</p>
+<div class="login-shell">
+  <section class="login-aside">
+    <div class="login-brand">
+      <div class="logo-icon"><i data-lucide="shopping-cart"></i></div>
+      <div>
+        <h1>PyCommerceX</h1>
+        <small class="brand-subtitle">Sistema de Gestión Comercial</small>
+      </div>
     </div>
+    <div class="login-copy">
+      <h2>Controla inventario, caja y ventas desde un solo panel.</h2>
+      <p>Acceso seguro para jefes, administradores y cajeros.</p>
+    </div>
+    <div class="login-metrics">
+      <div class="login-metric"><strong>Ventas</strong><span>POS rápido</span></div>
+      <div class="login-metric"><strong>Stock</strong><span>Alertas claras</span></div>
+      <div class="login-metric"><strong>Roles</strong><span>Permisos</span></div>
+    </div>
+  </section>
+
+  <section class="login-panel">
+    <h2>Iniciar sesión</h2>
+    <p>Ingresa tus datos para continuar.</p>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
@@ -54,34 +123,45 @@
     <form method="POST" action="{{ url_for('auth.login') }}">
       <div class="form-group">
         <label class="form-label">Identificación</label>
-        <input type="text" name="identification" class="form-control"
-               placeholder="Ingresa tu número de identificación" required autofocus>
+        <div class="input-with-icon">
+          <i data-lucide="id-card"></i>
+          <input type="text" name="identification" class="form-control"
+                 placeholder="Número de identificación" required autofocus>
+        </div>
       </div>
       <div class="form-group">
         <label class="form-label">Contraseña</label>
-        <input type="password" name="password" class="form-control"
-               placeholder="••••••••" required>
+        <div class="input-with-icon">
+          <i data-lucide="lock-keyhole"></i>
+          <input type="password" name="password" class="form-control"
+                 placeholder="Tu contraseña" required>
+        </div>
       </div>
       <div class="form-group">
         <label class="form-label">Verificación CAPTCHA</label>
         <div class="captcha-box">
           <span class="captcha-question">{{ captcha_question }}</span>
-          <span style="font-size:.75rem;color:var(--text-muted);">Resuelve para continuar</span>
+          <span class="badge badge-muted">Resolver</span>
         </div>
         <input type="number" name="captcha_answer" class="form-control"
-               placeholder="Tu respuesta" required min="0" max="20">
+               placeholder="Respuesta" required min="0" max="20">
       </div>
-      <button type="submit" class="btn btn-primary btn-lg" style="width:100%;justify-content:center;margin-top:8px;">
-        Iniciar Sesión
+      <button type="submit" class="btn btn-primary btn-lg" style="width:100%;">
+        <i data-lucide="log-in"></i> Entrar al sistema
       </button>
     </form>
 
     <div class="roles-info">
-      <span class="role-chip" style="background:rgba(255,215,0,.1);color:#FFD700;">⭐ Jefe</span>
-      <span class="role-chip" style="background:rgba(229,62,62,.1);color:#E53E3E;">🔴 Administrador</span>
-      <span class="role-chip" style="background:rgba(113,128,150,.1);color:#718096;">⚪ Cajero</span>
+      <span class="role-chip" style="background:rgba(255,215,0,.16);color:#9a7400;">Jefe</span>
+      <span class="role-chip" style="background:rgba(229,62,62,.12);color:#b91c1c;">Administrador</span>
+      <span class="role-chip" style="background:rgba(113,128,150,.16);color:#475569;">Cajero</span>
     </div>
-  </div>
+  </section>
 </div>
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+    if (window.lucide) window.lucide.createIcons();
+  });
+</script>
 </body>
 </html>

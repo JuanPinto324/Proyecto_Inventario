@@ -1,37 +1,52 @@
 {% extends 'base.html' %}
-{% block title %}Panel Principal — PyCommerceX{% endblock %}
+{% block title %}Panel Principal - PyCommerceX{% endblock %}
 {% block topbar_title %}Panel Principal{% endblock %}
 
 {% block content %}
-<!-- Stats -->
 <div class="stat-grid">
-  <div class="card">
-    <div class="card-title">💰 Ventas del Día</div>
+  <div class="card metric-card">
+    <div class="metric-head">
+      <div class="card-title">Ventas del Día</div>
+      <span class="metric-icon"><i data-lucide="banknote"></i></span>
+    </div>
     <div class="card-value">$ {{ "{:,}".format(total_today) }}</div>
     <div class="card-sub">{{ invoices_today }} factura{{ 's' if invoices_today != 1 }}</div>
   </div>
-  <div class="card">
-    <div class="card-title">🛍 Artículos Vendidos</div>
+  <div class="card metric-card">
+    <div class="metric-head">
+      <div class="card-title">Artículos Vendidos</div>
+      <span class="metric-icon"><i data-lucide="shopping-bag"></i></span>
+    </div>
     <div class="card-value">{{ items_today }}</div>
     <div class="card-sub">unidades hoy</div>
   </div>
-  <div class="card">
-    <div class="card-title">📦 Productos Activos</div>
+  <div class="card metric-card">
+    <div class="metric-head">
+      <div class="card-title">Productos Activos</div>
+      <span class="metric-icon"><i data-lucide="boxes"></i></span>
+    </div>
     <div class="card-value">{{ total_products }}</div>
     <div class="card-sub">en catálogo</div>
   </div>
-  <div class="card">
-    <div class="card-title">⚠ Bajo Stock</div>
+  <div class="card metric-card">
+    <div class="metric-head">
+      <div class="card-title">Bajo Stock</div>
+      <span class="metric-icon" style="color:var(--warning);background:#fef3c7;"><i data-lucide="triangle-alert"></i></span>
+    </div>
     <div class="card-value" style="color: var(--warning)">{{ low_stock_count }}</div>
     <div class="card-sub">{{ out_of_stock_count }} agotado{{ 's' if out_of_stock_count != 1 }}</div>
   </div>
 </div>
 
-<!-- Alert Products Table -->
 <div class="card mb-3">
   <div class="page-header">
-    <h2>⚠ Alertas de Inventario</h2>
-    <a href="{{ url_for('inventory.index') }}" class="btn btn-outline btn-sm">Ver inventario →</a>
+    <div class="page-title">
+      <span class="icon"><i data-lucide="triangle-alert"></i></span>
+      <h2>Alertas de Inventario</h2>
+    </div>
+    <a href="{{ url_for('inventory.index') }}" class="btn btn-outline btn-sm">
+      Ver inventario <i data-lucide="arrow-right"></i>
+    </a>
   </div>
   {% if alert_products %}
   <div class="table-wrap">
@@ -50,13 +65,13 @@
         <tr>
           <td><code>{{ p.code }}</code></td>
           <td>{{ p.name }}</td>
-          <td class="{{ p.status_class }}">{{ p.stock }}</td>
+          <td class="{{ p.status_class }}"><strong>{{ p.stock }}</strong></td>
           <td>{{ p.min_stock }}</td>
           <td>
             {% if p.status == 'Agotado' %}
-              <span class="badge badge-danger">Agotado</span>
+              <span class="badge badge-danger"><i data-lucide="circle-x"></i> Agotado</span>
             {% else %}
-              <span class="badge badge-warning">Bajo Stock</span>
+              <span class="badge badge-warning"><i data-lucide="triangle-alert"></i> Bajo Stock</span>
             {% endif %}
           </td>
         </tr>
@@ -65,33 +80,35 @@
     </table>
   </div>
   {% else %}
-    <p class="text-muted text-center" style="padding:20px">✅ Todos los productos tienen stock suficiente.</p>
+    <p class="empty-state">Todos los productos tienen stock suficiente.</p>
   {% endif %}
 </div>
 
-<!-- Quick Actions -->
 <div class="card">
-  <h3 style="margin-bottom:12px;">⚡ Accesos Rápidos</h3>
+  <div class="page-title mb-2">
+    <span class="icon"><i data-lucide="zap"></i></span>
+    <h3>Accesos Rápidos</h3>
+  </div>
   <div class="quick-actions">
     <a href="{{ url_for('pos.index') }}" class="qa-card">
-      <span class="qa-icon">🛒</span>
+      <span class="qa-icon"><i data-lucide="scan-barcode"></i></span>
       <span class="qa-label">Abrir Caja</span>
     </a>
     <a href="{{ url_for('inventory.index') }}" class="qa-card">
-      <span class="qa-icon">📦</span>
+      <span class="qa-icon"><i data-lucide="boxes"></i></span>
       <span class="qa-label">Inventario</span>
     </a>
     <a href="{{ url_for('inventory.new') }}" class="qa-card">
-      <span class="qa-icon">➕</span>
+      <span class="qa-icon"><i data-lucide="package-plus"></i></span>
       <span class="qa-label">Nuevo Producto</span>
     </a>
     <a href="{{ url_for('sales.index') }}" class="qa-card">
-      <span class="qa-icon">📋</span>
+      <span class="qa-icon"><i data-lucide="receipt-text"></i></span>
       <span class="qa-label">Historial Ventas</span>
     </a>
     {% if current_user.role in ('jefe', 'administrador') %}
     <a href="{{ url_for('users.new') }}" class="qa-card">
-      <span class="qa-icon">👤</span>
+      <span class="qa-icon"><i data-lucide="user-plus"></i></span>
       <span class="qa-label">Crear Usuario</span>
     </a>
     {% endif %}

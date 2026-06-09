@@ -1,45 +1,45 @@
 {% extends 'base.html' %}
-{% block title %}Historial de Ventas — PyCommerceX{% endblock %}
+{% block title %}Historial de Ventas - PyCommerceX{% endblock %}
 {% block topbar_title %}Historial de Ventas{% endblock %}
 
 {% block content %}
 <div class="page-header">
-  <h1>📋 Historial de Ventas</h1>
+  <div class="page-title">
+    <span class="icon"><i data-lucide="receipt-text"></i></span>
+    <h1>Historial de Ventas</h1>
+  </div>
 </div>
 
-<!-- Stats -->
 <div class="stat-grid mb-3">
-  <div class="card">
-    <div class="card-title">💰 Total Recaudado</div>
+  <div class="card metric-card">
+    <div class="metric-head"><div class="card-title">Total Recaudado</div><span class="metric-icon"><i data-lucide="banknote"></i></span></div>
     <div class="card-value">$ {{ "{:,}".format(total_amount) }}</div>
   </div>
-  <div class="card">
-    <div class="card-title">🧾 Facturas</div>
+  <div class="card metric-card">
+    <div class="metric-head"><div class="card-title">Facturas</div><span class="metric-icon"><i data-lucide="receipt"></i></span></div>
     <div class="card-value">{{ total_invoices }}</div>
   </div>
-  <div class="card">
-    <div class="card-title">📦 Artículos</div>
+  <div class="card metric-card">
+    <div class="metric-head"><div class="card-title">Artículos</div><span class="metric-icon"><i data-lucide="package-check"></i></span></div>
     <div class="card-value">{{ total_items }}</div>
   </div>
-  <div class="card">
-    <div class="card-title">↩ Devoluciones</div>
+  <div class="card metric-card">
+    <div class="metric-head"><div class="card-title">Devoluciones</div><span class="metric-icon" style="color:var(--warning);background:#fef3c7;"><i data-lucide="rotate-ccw"></i></span></div>
     <div class="card-value" style="color:var(--warning)">{{ total_returns }}</div>
   </div>
 </div>
 
-<!-- Filters -->
 <div class="card mb-3">
   <form method="GET" class="flex-gap" style="flex-wrap:wrap">
     <a href="?filter=today" class="btn {% if filter_type == 'today' %}btn-primary{% else %}btn-outline{% endif %} btn-sm">Hoy</a>
     <a href="?filter=yesterday" class="btn {% if filter_type == 'yesterday' %}btn-primary{% else %}btn-outline{% endif %} btn-sm">Ayer</a>
     <input type="hidden" name="filter" value="range">
     <input type="date" name="from" class="form-control" style="width:auto" value="{{ date_from }}">
-    <input type="date" name="to"   class="form-control" style="width:auto" value="{{ date_to }}">
-    <button type="submit" class="btn btn-outline btn-sm">🔍 Filtrar</button>
+    <input type="date" name="to" class="form-control" style="width:auto" value="{{ date_to }}">
+    <button type="submit" class="btn btn-outline btn-sm"><i data-lucide="filter"></i> Filtrar</button>
   </form>
 </div>
 
-<!-- Table -->
 <div class="card">
   <div class="table-wrap">
     <table>
@@ -64,17 +64,19 @@
           <td>$ {{ "{:,}".format(s.total) }}</td>
           <td>
             {% if s.is_returned %}
-              <span class="badge badge-warning">↩ Devuelto</span>
+              <span class="badge badge-warning"><i data-lucide="rotate-ccw"></i> Devuelto</span>
             {% else %}
-              <span class="badge badge-success">✓ Pagado</span>
+              <span class="badge badge-success"><i data-lucide="check-circle-2"></i> Pagado</span>
             {% endif %}
           </td>
           <td>
-            <a href="{{ url_for('sales.detail', sale_id=s.id) }}" class="btn btn-outline btn-sm">Ver</a>
+            <a href="{{ url_for('sales.detail', sale_id=s.id) }}" class="btn btn-outline btn-sm">
+              <i data-lucide="eye"></i> Ver
+            </a>
           </td>
         </tr>
         {% else %}
-        <tr><td colspan="7" class="text-center text-muted" style="padding:24px">Sin ventas en este período.</td></tr>
+        <tr><td colspan="7" class="empty-state">Sin ventas en este período.</td></tr>
         {% endfor %}
       </tbody>
     </table>

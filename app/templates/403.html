@@ -2,10 +2,12 @@
 {% block title %}Acceso Denegado{% endblock %}
 {% block topbar_title %}Error{% endblock %}
 {% block content %}
-<div style="text-align:center;padding:60px 20px">
-  <div style="font-size:4rem;margin-bottom:16px">🚫</div>
+<div class="card" style="max-width:520px;margin:54px auto;text-align:center;padding:42px 28px">
+  <div class="page-title" style="justify-content:center;margin-bottom:16px">
+    <span class="icon" style="color:var(--danger);background:#fee2e2"><i data-lucide="shield-alert"></i></span>
+  </div>
   <h2>Acceso Denegado</h2>
   <p class="text-muted mt-1">No tienes permisos para acceder a esta sección.</p>
-  <a href="{{ url_for('pos.index') }}" class="btn btn-primary mt-3">← Volver</a>
+  <a href="{{ url_for('pos.index') }}" class="btn btn-primary mt-3"><i data-lucide="arrow-left"></i> Volver</a>
 </div>
 {% endblock %}
