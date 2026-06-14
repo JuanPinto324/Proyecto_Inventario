@@ -6,7 +6,7 @@
   <title>PyCommerceX - Iniciar Sesión</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
   <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js" defer></script>
-  <!--<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>-->
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
   <style>
     body {
       min-height: 100vh;
@@ -129,7 +129,6 @@
       </div>
 
       <!-- Cloudflare Turnstile -->
-      <!--
       <div class="form-group">
         <label class="form-label">Verificación de seguridad</label>
         <div class="cf-turnstile"
@@ -138,7 +137,7 @@
              data-language="es">
         </div>
       </div>
-      -->
+      
 
       <button type="submit" class="btn btn-primary btn-lg" style="width:100%;margin-top:4px">
         <i data-lucide="log-in"></i> Entrar al sistema

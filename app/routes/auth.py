@@ -17,20 +17,20 @@ def login():
         #turnstile_token  = request.form.get('cf-turnstile-response', '')
 
         # Verificar Turnstile con Cloudflare
-        #secret_key = os.environ.get('TURNSTILE_SECRET_KEY', '')
-        #verify_resp = requests.post(
-            #'https://challenges.cloudflare.com/turnstile/v0/siteverify',
-            #data={
-                #'secret': secret_key,
-                #'response': turnstile_token,
-                #'remoteip': request.remote_addr
-            #}
-        #)
-        #result = verify_resp.json()
+        secret_key = os.environ.get('TURNSTILE_SECRET_KEY', '')
+        verify_resp = requests.post(
+            'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+            data={
+                'secret': secret_key,
+                'response': turnstile_token,
+                'remoteip': request.remote_addr
+            }
+        )
+        result = verify_resp.json()
 
-        #if not result.get('success'):
-            #flash('Verificación de seguridad fallida. Inténtalo de nuevo.', 'danger')
-            #return redirect(url_for('auth.login'))
+        if not result.get('success'):
+            flash('Verificación de seguridad fallida. Inténtalo de nuevo.', 'danger')
+            return redirect(url_for('auth.login'))
 
         user = User.query.filter_by(identification=identification, is_active=True).first()
         if user and user.check_password(password):
