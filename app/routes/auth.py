@@ -14,7 +14,7 @@ def login():
     if request.method == 'POST':
         identification   = request.form.get('identification', '').strip()
         password         = request.form.get('password', '')
-        #turnstile_token  = request.form.get('cf-turnstile-response', '')
+        turnstile_token  = request.form.get('cf-turnstile-response', '')
 
         # Verificar Turnstile con Cloudflare
         secret_key = os.environ.get('TURNSTILE_SECRET_KEY', '')
